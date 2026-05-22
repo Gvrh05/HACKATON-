@@ -1,6 +1,11 @@
-import { useState, useEffect } from 'react';
-// Importamos la función de eliminación aquí
-import { obtenerHistorialCompleto, eliminarSolucionDelHistorial, ErrorKnowledge } from '../../data/knowledgeBase';
+import { useEffect, useState } from 'react';
+import {
+  ErrorKnowledge,
+  eliminarSolucionDelHistorial,
+  guardarOActualizarSolucion,
+  obtenerHistorialCompleto,
+} from '../../data/knowledgeBase';
+import RunbookEditorModal from './RunbookEditorModal.tsx';
 
 interface GlobalHistoryViewProps {
   onBack: () => void;
@@ -8,6 +13,7 @@ interface GlobalHistoryViewProps {
 
 export default function GlobalHistoryView({ onBack }: GlobalHistoryViewProps) {
   const [historial, setHistorial] = useState<ErrorKnowledge[]>([]);
+  const [registroEditando, setRegistroEditando] = useState<ErrorKnowledge | null>(null);
 
   // Función encargada de cargar los datos frescos del LocalStorage
   const refrescarHistorial = () => {
@@ -20,11 +26,15 @@ export default function GlobalHistoryView({ onBack }: GlobalHistoryViewProps) {
 
   const handleEliminarRegistro = (id: string) => {
     if (confirm("¿Estás seguro de que deseas eliminar esta solución de la base de conocimiento? Esto reactivará el análisis en vivo de la IA para este error.")) {
-      // 1. Borramos del LocalStorage
       eliminarSolucionDelHistorial(id);
-      // 2. Refrescamos el estado para que desaparezca de la tabla inmediatamente
       refrescarHistorial();
     }
+  };
+
+  const handleGuardarEdicion = (registroActualizado: ErrorKnowledge) => {
+    guardarOActualizarSolucion(registroActualizado);
+    refrescarHistorial();
+    setRegistroEditando(null);
   };
 
   return (
@@ -96,15 +106,23 @@ export default function GlobalHistoryView({ onBack }: GlobalHistoryViewProps) {
                       </div>
                     </td>
 
-                    {/* Botón de Borrado de la Base Global */}
                     <td className="p-4 text-center">
-                      <button
-                        onClick={() => handleEliminarRegistro(item.id)}
-                        className="p-2 bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 rounded-xl transition border border-rose-100 cursor-pointer shadow-sm active:scale-90"
-                        title="Eliminar de la Base de Conocimiento"
-                      >
-                        🗑️ Borrar
-                      </button>
+                      <div className="flex flex-col gap-2">
+                        <button
+                          onClick={() => setRegistroEditando(item)}
+                          className="px-3 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold transition border border-blue-100"
+                        >
+                          ✏️ Editar
+                        </button>
+
+                        <button
+                          onClick={() => handleEliminarRegistro(item.id)}
+                          className="px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-bold transition border border-rose-100"
+                          title="Eliminar de la Base de Conocimiento"
+                        >
+                          🗑️ Borrar
+                        </button>
+                      </div>
                     </td>
 
                   </tr>
@@ -114,6 +132,14 @@ export default function GlobalHistoryView({ onBack }: GlobalHistoryViewProps) {
           </div>
         )}
       </div>
+
+      {registroEditando && (
+        <RunbookEditorModal
+          item={registroEditando}
+          onClose={() => setRegistroEditando(null)}
+          onSave={handleGuardarEdicion}
+        />
+      )}
     </div>
   );
 }
