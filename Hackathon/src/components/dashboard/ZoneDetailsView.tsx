@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { buscarSolucionEnHistorial, guardarOActualizarSolucion, ErrorKnowledge } from '../../data/knowledgeBase';
-import { consultarIA } from '../../services/aiService'; 
+import { consultarIA } from '../../services/aiService';
+import { type ZabbixProblem } from '../../data/zabbixData';
 
 interface ZoneDetailsViewProps {
   zoneName: string;
-  zoneProblems: any[]; 
+  zoneProblems: ZabbixProblem[];
   onBack: () => void;
+  allProblems?: ZabbixProblem[];
 }
 
-export default function ZoneDetailsView({ zoneName, zoneProblems, onBack }: ZoneDetailsViewProps) {
+export default function ZoneDetailsView({ zoneName, zoneProblems, onBack, allProblems = [] }: ZoneDetailsViewProps) {
   const [analizandoId, setAnalizandoId] = useState<string | null>(null);
   const [solucionesAbiertas, setSolucionesAbiertas] = useState<{ [key: string]: ErrorKnowledge }>({});
 
@@ -43,7 +45,7 @@ export default function ZoneDetailsView({ zoneName, zoneProblems, onBack }: Zone
       // 🤖 PASO 2: Llamada al núcleo de Inteligencia Artificial
       let respuestaCrudaGemini = "";
       try {
-        respuestaCrudaGemini = await consultarIA(problema, []);
+        respuestaCrudaGemini = await consultarIA(problema, allProblems);
       } catch (e) {
         console.warn("Fallo de conexión con API Gemini. Activando redundancia local.");
       }

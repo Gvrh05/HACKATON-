@@ -1,16 +1,17 @@
 import { useState } from 'react';
-import { parsedProblems } from '../../data/zabbixData';
+import { type ZabbixProblem } from '../../data/zabbixData';
 
 interface AiConsoleProps {
   zoneName: string;
   onBack: () => void;
+  allProblems: ZabbixProblem[];
 }
 
-export default function AiConsole({ zoneName, onBack }: AiConsoleProps) {
+export default function AiConsole({ zoneName, onBack, allProblems }: AiConsoleProps) {
   const [severityFilter, setSeverityFilter] = useState<'ALL' | 'High' | 'Warning'>('ALL');
 
   // Filtrar las alertas que pertenecen UNICAMENTE a esta zona seleccionada
-  const activeZoneProblems = parsedProblems.filter(
+  const activeZoneProblems = allProblems.filter(
     (p) => p.zone === zoneName && p.status === 'PROBLEM'
   );
 

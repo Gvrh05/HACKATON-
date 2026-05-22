@@ -1,17 +1,24 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import ZonesView from './components/dashboard/ZonesView';
 import ZoneDetailsView from './components/dashboard/ZoneDetailsView';
-// 1. Importamos la vista del historial global que estaba desconectada
 import GlobalHistoryView from './components/dashboard/GlobalHistoryView';
 
-// Importamos tus datos tipados
-import { zoneSummaries, parsedProblems } from './data/zabbixData';
+import { obtenerProblemasRealesZabbix } from './services/zabbixService';
+import { calculateZoneSummaries, type ZabbixProblem } from './data/zabbixData';
 
 function App() {
   const [selectedZone, setSelectedZone] = useState<string | null>(null);
-  
-  // 2. Nuevo estado para controlar si el usuario está viendo la bitácora de historial
   const [verHistorial, setVerHistorial] = useState<boolean>(false);
+  
+  const [parsedProblems, setParsedProblems] = useState<ZabbixProblem[]>([]);
+  const [zoneSummaries, setZoneSummaries] = useState<Array<{ name: string; electricCount: number; icmpCount: number }>>([]);
+
+  useEffect(() => {
+    obtenerProblemasRealesZabbix().then(data => {
+      setParsedProblems(data);
+      setZoneSummaries(calculateZoneSummaries(data));
+    });
+  }, []);
 
   // FILTRADO 100% DINÁMICO:
   const zoneProblems = selectedZone 
@@ -44,7 +51,7 @@ function App() {
             </div>
           </div>
 
-          {/* 3. BOTÓN ELEGANTE EN EL HEADER PRINCIPAL (Solo visible en la pantalla de inicio) */}
+          {/* BOTÓN ELEGANTE EN EL HEADER PRINCIPAL (Solo visible en la pantalla de inicio) */}
           {!selectedZone && !verHistorial && (
             <button
               onClick={() => setVerHistorial(true)}
@@ -65,14 +72,15 @@ function App() {
           <GlobalHistoryView onBack={() => setVerHistorial(false)} />
         ) : !selectedZone ? (
           // Vista B: Cuadrícula principal de zonas (Dashboard base)
-          <ZonesView onSelectZone={setSelectedZone} />
+          <ZonesView onSelectZone={setSelectedZone} zoneSummaries={zoneSummaries} />
         ) : (
           // Vista C: Detalle unificado de la zona seleccionada (Sin duplicados abajo)
           <div className="space-y-6">
             <ZoneDetailsView 
               zoneName={selectedZone} 
               onBack={() => setSelectedZone(null)} 
-              zoneProblems={zoneProblems} 
+              zoneProblems={zoneProblems}
+              allProblems={parsedProblems}
             />
           </div>
         )}

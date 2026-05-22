@@ -3,7 +3,7 @@ import path from "path";
 import dotenv from "dotenv";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
-import { parsedProblems, ZabbixProblem } from "./src/data/zabbixData";
+import { obtenerProblemasRealesZabbix, ZabbixProblem } from "./src/services/zabbixService";
 
 dotenv.config();
 
@@ -12,8 +12,18 @@ const PORT = 3000;
 
 app.use(express.json());
 
-// In-memory problem store initialized with our parsed problems
-let currentProblems: ZabbixProblem[] = [...parsedProblems];
+// In-memory problem store - se inicializa de forma asincrónica
+let currentProblems: ZabbixProblem[] = [];
+
+// Cargar problemas al iniciar
+(async () => {
+  try {
+    currentProblems = await obtenerProblemasRealesZabbix();
+    console.log(`✓ Cargados ${currentProblems.length} problemas de la API Zabbix`);
+  } catch (error) {
+    console.error("✗ Error al cargar datos iniciales de Zabbix:", error);
+  }
+})();
 
 // Lazy-initialized Gemini client with safety guard and telemetry Header
 let aiClient: GoogleGenAI | null = null;
@@ -138,14 +148,23 @@ app.post("/api/zabbix/problems/toggle-status", (req, res) => {
 });
 
 // 4. Reset simulation dataset
-app.post("/api/zabbix/reset", (req, res) => {
-  currentProblems = [...parsedProblems].map(p => ({ ...p }));
-  res.json({
-    jsonrpc: "2.0",
-    result: "success",
-    message: "Dataset de eventos Zabbix de Coopeguanacaste restaurado exitosamente.",
-    id: 1
-  });
+app.post("/api/zabbix/reset", async (req, res) => {
+  try {
+    currentProblems = await obtenerProblemasRealesZabbix();
+    res.json({
+      jsonrpc: "2.0",
+      result: "success",
+      message: "Dataset de eventos Zabbix de Coopeguanacaste restaurado exitosamente desde la API.",
+      problemsLoaded: currentProblems.length,
+      id: 1
+    });
+  } catch (error) {
+    res.status(500).json({
+      jsonrpc: "2.0",
+      error: "Error restaurando datos de Zabbix",
+      id: 1
+    });
+  }
 });
 
 // 5. AIOps Super-Incident Engine (Clustering / Alert correlation)

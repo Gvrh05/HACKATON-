@@ -1,11 +1,12 @@
 import { useState } from 'react';
-import { zoneSummaries } from '../../data/zabbixData';
+import { type ZabbixProblem } from '../../data/zabbixData';
 
 interface ZonesViewProps {
   onSelectZone: (zoneName: string) => void;
+  zoneSummaries: Array<{ name: string; electricCount: number; icmpCount: number }>;
 }
 
-export default function ZonesView({ onSelectZone }: ZonesViewProps) {
+export default function ZonesView({ onSelectZone, zoneSummaries }: ZonesViewProps) {
   // Estados para el buscador y los filtros rápidos
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState<'ALL' | 'POWER' | 'ICMP'>('ALL');
