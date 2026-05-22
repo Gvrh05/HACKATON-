@@ -1,0 +1,6 @@
+{
+  "name": "Coopeguanacaste AIOps Dashboard",
+  "description": "Dashboard de Mantenimiento Correctivo Inteligente y Triaje de Alertas Zabbix en tiempo real con diagnóstico de Causa Raíz asistido por IA (Gemini).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
