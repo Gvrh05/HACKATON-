@@ -17,6 +17,15 @@ export default defineConfig(() => {
       hmr: process.env.DISABLE_HMR !== 'true',
       // Disable file watching when DISABLE_HMR is true to save CPU during agent edits.
       watch: process.env.DISABLE_HMR === 'true' ? null : {},
+
+      //configuracion del proxy de zabixx
+      proxy: {
+        '/zabbix-api': {
+          target: 'http://172.28.20.190/zabbix/api_jsonrpc.php',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/zabbix-api/, ''),
+        },
+      },
     },
   };
 });
