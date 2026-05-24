@@ -116,35 +116,28 @@ export default function AiConsole({ zoneName, onBack }: AiConsoleProps) {
 
       </div>
 
-      {/* Bloque del Correlación Inteligente de Incidentes */}
+{/* Bloque del Correlación Inteligente de Incidentes */}
       <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-2xl p-6 shadow-md relative overflow-hidden">
         <div className="absolute right-0 bottom-0 translate-x-1/4 translate-y-1/4 w-64 h-64 bg-green-500/10 rounded-full blur-2xl pointer-events-none"></div>
         <div className="flex items-center gap-2 mb-3">
           <span className="px-2 py-0.5 bg-green-500/20 text-green-400 text-[10px] font-mono font-bold rounded border border-green-500/30 uppercase tracking-wider">
-            Diagnóstico de Causa Raíz (RCA)
+            Analizador Dinámico de Telemetría
           </span>
-          <span className="text-xs text-slate-400 font-mono">• Analizador Topológico</span>
+          <span className="text-xs text-slate-400 font-mono">• Estado de Red</span>
         </div>
         
-        {highSeverityCount > 0 && powerIssuesCount > 0 ? (
-          <div>
-            <h3 className="text-lg font-bold text-green-400 font-display">
-              Efecto Cascada por Degradación de Suministro Eléctrico
-            </h3>
-            <p className="text-sm text-slate-300 mt-1 leading-relaxed max-w-5xl">
-              El motor identifica que las alarmas de tipo <span className="text-rose-400 font-mono">ICMP ping down</span> están precedidas cronológicamente por fallas críticas en las fuentes de poder DC de los routers de la zona. Se recomienda validar breakers e inversores en el sitio físico de distribución.
-            </p>
-          </div>
-        ) : (
-          <div>
-            <h3 className="text-lg font-bold text-slate-200 font-display">
-              Monitoreo y Alertas Crónicas en la Zona
-            </h3>
-            <p className="text-sm text-slate-300 mt-1 leading-relaxed max-w-5xl">
-              No se detecta un patrón de caída masiva concurrente en este instante. Sin embargo, existen eventos individuales con duraciones prolongadas que degradan la redundancia física de la red regional.
-            </p>
-          </div>
-        )}
+        <div>
+          <h3 className="text-lg font-bold text-slate-200 font-display">
+            Métricas de Eventos Concurrentes en Región: <span className="text-green-400">{zoneName}</span>
+          </h3>
+          <p className="text-sm text-slate-300 mt-1 leading-relaxed max-w-5xl">
+            Se están evaluando un total de <span className="text-white font-bold">{totalAlerts}</span> incidencias activas en el nodo regional. 
+            {highSeverityCount > 0 
+              ? ` Alerta crítica: se identifican ${highSeverityCount} anomalías severas de conectividad que comprometen directamente la disponibilidad del servicio.` 
+              : " El núcleo no registra degradaciones de criticidad extrema (Disaster/High) en la topología IP actual."}
+            {powerIssuesCount > 0 && ` Adicionalmente, el parser detecta ${powerIssuesCount} eventos directamente relacionados con fallas de suministro eléctrico (Power Link) afectando de forma síncrona a los dispositivos periféricos.`}
+          </p>
+        </div>
       </div>
 
       {/* Lista técnica detallada de filas de Zabbix */}
